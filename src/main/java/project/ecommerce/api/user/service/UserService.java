@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.ecommerce.api.s3.service.S3Service;
 import project.ecommerce.api.user.dto.request.UserPasswordRequest;
+import project.ecommerce.api.user.dto.request.UserProfileRequest;
 import project.ecommerce.api.user.dto.request.UserSignupRequest;
 import project.ecommerce.api.user.dto.response.UserResponse;
 import project.ecommerce.api.user.entity.User;
@@ -19,6 +21,7 @@ import project.ecommerce.common.exception.BaseException;
 @Transactional(readOnly = true)
 public class UserService {
 
+    private final S3Service s3Service;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -50,6 +53,18 @@ public class UserService {
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
 
         user.encodePassword(passwordEncoder.encode(request.password()));
+        userRepository.save(user);
+    }
+
+    public void updateProfile(UserProfileRequest request, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
+
+        if (!s3Service.isFileUploaded(request.profileImageUrl())) {
+            throw new BaseException(UserExceptionType.INVALID_PROFILE_IMAGE_URL);
+        }
+
+        user.updateProfileImageUrl(request.profileImageUrl());
         userRepository.save(user);
     }
 

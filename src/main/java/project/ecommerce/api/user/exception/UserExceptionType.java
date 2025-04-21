@@ -13,6 +13,7 @@ public enum UserExceptionType implements ExceptionType {
     USER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "user-002", "이미 존재하는 사용자입니다."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "user-003", "잘못된 비밀번호입니다."),
     INVALID_EMAIL(HttpStatus.BAD_REQUEST, "user-004", "잘못된 이메일입니다."),
+    INVALID_PROFILE_IMAGE_URL(HttpStatus.BAD_REQUEST, "user-005", "잘못된 프로필 이미지 URL입니다."),
 
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "user-005", "인증되지 않은 사용자입니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "user-006", "접근 권한이 없습니다."),
