@@ -35,7 +35,7 @@ public class S3Service {
 
             log.info("Presigned Upload URL 생성 성공: {}", presignedUrl);
 
-            return PresignedUrlResponse.of(presignedUrl);
+            return PresignedUrlResponse.of(presignedUrl, uploadUrl);
         } catch (Exception e) {
             throw new RuntimeException("Presigned URL 생성 실패: " + e.getMessage());
         }

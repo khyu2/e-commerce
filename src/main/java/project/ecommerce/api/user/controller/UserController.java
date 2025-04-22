@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.ecommerce.api.user.dto.request.UserPasswordRequest;
+import project.ecommerce.api.user.dto.request.UserProfileImageRequest;
 import project.ecommerce.api.user.dto.request.UserProfileRequest;
 import project.ecommerce.api.user.dto.request.UserSignupRequest;
 import project.ecommerce.api.user.dto.response.UserResponse;
@@ -40,8 +41,7 @@ public class UserController {
     public ResponseEntity<?> validatePassword(
             @Parameter(hidden = true) @Auth User user,
             @Valid @RequestBody UserPasswordRequest request) {
-        var isValid = userService.validatePassword(request, user.getId());
-        return ResponseEntity.ok(isValid);
+        return ResponseEntity.ok(userService.validatePassword(request, user.getId()));
     }
 
     @Operation(summary = "비밀번호 변경 API")
@@ -49,17 +49,23 @@ public class UserController {
     public ResponseEntity<?> updatePassword(
             @Parameter(hidden = true) @Auth User user,
             @Valid @RequestBody UserPasswordRequest request) {
-        userService.updatePassword(request, user.getId());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userService.updatePassword(request, user.getId()));
     }
 
     @Operation(summary = "회원 프로필 이미지 수정 API")
+    @PutMapping("/profile-image")
+    public ResponseEntity<?> updateProfileImage(
+            @Parameter(hidden = true) @Auth User user,
+            @Valid @RequestBody UserProfileImageRequest request) {
+        return ResponseEntity.ok(userService.updateProfileImage(request, user.getId()));
+    }
+
+    @Operation(summary = "회원 프로필 수정 API")
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(
             @Parameter(hidden = true) @Auth User user,
             @Valid @RequestBody UserProfileRequest request) {
-        userService.updateProfile(request, user.getId());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userService.updateProfile(request, user.getId()));
     }
 
     @Operation(summary = "회원탈퇴 API")
