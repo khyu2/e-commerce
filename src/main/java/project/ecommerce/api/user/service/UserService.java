@@ -6,15 +6,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.ecommerce.api.s3.service.S3Service;
-import project.ecommerce.api.user.dto.request.UserPasswordRequest;
-import project.ecommerce.api.user.dto.request.UserProfileImageRequest;
-import project.ecommerce.api.user.dto.request.UserProfileRequest;
-import project.ecommerce.api.user.dto.request.UserSignupRequest;
+import project.ecommerce.api.user.dto.request.*;
+import project.ecommerce.api.user.dto.response.AddressResponse;
 import project.ecommerce.api.user.dto.response.UserResponse;
+import project.ecommerce.api.user.entity.Address;
 import project.ecommerce.api.user.entity.User;
 import project.ecommerce.api.user.exception.UserExceptionType;
+import project.ecommerce.api.user.repository.AddressRepository;
 import project.ecommerce.api.user.repository.UserRepository;
 import project.ecommerce.common.exception.BaseException;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -24,7 +26,10 @@ public class UserService {
 
     private final S3Service s3Service;
     private final UserRepository userRepository;
+    private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private static final int ADDRESS_LIMIT = 5;
 
     // TODO: password validation
     @Transactional
@@ -85,6 +90,83 @@ public class UserService {
         user.updateProfile(request.name());
         return UserResponse.of(userRepository.save(user));
     }
+
+    @Transactional
+    public AddressResponse addAddress(AddressRequest request, User user) {
+        if (user.getAddresses().size() >= ADDRESS_LIMIT) {
+            throw new BaseException(UserExceptionType.ADDRESS_LIMIT_EXCEEDED);
+        }
+
+        Address address = Address.of(request);
+        address.addUser(user);
+
+        if (user.getAddresses().size() == 1) {
+            address.updateIsDefault(true);
+        }
+
+        addressRepository.save(address);
+
+        return AddressResponse.of(address);
+    }
+
+    @Transactional
+    public AddressResponse updateAddress(AddressRequest request, Long addressId, User user) {
+        if (user.getAddresses().size() >= ADDRESS_LIMIT
+                || user.getAddresses().isEmpty()) {
+            throw new BaseException(UserExceptionType.ADDRESS_LIMIT_EXCEEDED);
+        }
+
+        Address address = user.getAddresses().stream()
+                .filter(a -> a.getId().equals(addressId))
+                .findFirst()
+                .orElseThrow(() -> new BaseException(UserExceptionType.INVALID_ADDRESS));
+
+        address.updateAddress(request.receiver(), request.address(), request.postalCode(), request.phone());
+
+        addressRepository.save(address);
+
+        return AddressResponse.of(address);
+    }
+
+    @Transactional
+    public AddressResponse updateDefaultAddress(Long addressId, User user) {
+        Address address = user.getAddresses().stream()
+                .filter(a -> a.getId().equals(addressId))
+                .findFirst()
+                .orElseThrow(() -> new BaseException(UserExceptionType.INVALID_ADDRESS));
+
+        user.getAddresses().forEach(a -> a.updateIsDefault(false));
+        address.updateIsDefault(true);
+
+        addressRepository.save(address);
+
+        return AddressResponse.of(address);
+    }
+
+    @Transactional
+    public void deleteAddress(Long addressId, User user) {
+        List<Address> addresses = user.getAddresses();
+
+        if (addresses.size() == 1) {
+            throw new BaseException(UserExceptionType.ADDRESS_UNDERFLOW);
+        }
+
+        Address addressToDelete = addresses.stream()
+                .filter(a -> a.getId().equals(addressId))
+                .findFirst()
+                .orElseThrow(() -> new BaseException(UserExceptionType.INVALID_ADDRESS));
+
+        boolean wasDefault = addressToDelete.getIsDefault();
+
+        addresses.remove(addressToDelete);
+        addressRepository.delete(addressToDelete);
+
+        if (wasDefault) {
+            addresses.forEach(a -> a.updateIsDefault(false));
+            addresses.get(0).updateIsDefault(true);
+        }
+    }
+
 
     @Transactional
     public void deleteUser(Long userId) {

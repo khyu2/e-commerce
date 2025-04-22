@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLRestriction;
 import project.ecommerce.common.utils.BaseTimeEntity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -35,6 +36,9 @@ public class User extends BaseTimeEntity {
     private UserRole role = UserRole.USER;
 
     private LocalDateTime deletedAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses;
 
     public void encodePassword(String password) {
         this.password = password;

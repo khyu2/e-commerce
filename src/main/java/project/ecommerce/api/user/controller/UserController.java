@@ -7,10 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import project.ecommerce.api.user.dto.request.UserPasswordRequest;
-import project.ecommerce.api.user.dto.request.UserProfileImageRequest;
-import project.ecommerce.api.user.dto.request.UserProfileRequest;
-import project.ecommerce.api.user.dto.request.UserSignupRequest;
+import project.ecommerce.api.user.dto.request.*;
 import project.ecommerce.api.user.dto.response.UserResponse;
 import project.ecommerce.api.user.entity.User;
 import project.ecommerce.api.user.service.UserService;
@@ -66,6 +63,41 @@ public class UserController {
             @Parameter(hidden = true) @Auth User user,
             @Valid @RequestBody UserProfileRequest request) {
         return ResponseEntity.ok(userService.updateProfile(request, user.getId()));
+    }
+
+    @Operation(summary = "회원 배송지 등록 API")
+    @PostMapping("/address")
+    public ResponseEntity<?> addAddress(
+            @Parameter(hidden = true) @Auth User user,
+            @Valid @RequestBody AddressRequest request) {
+        return ResponseEntity.ok(userService.addAddress(request, user));
+    }
+
+    @Operation(summary = "회원 배송지 수정 API")
+    @PutMapping("/address/{addressId}")
+    public ResponseEntity<?> updateAddress(
+            @Parameter(hidden = true) @Auth User user,
+            @PathVariable Long addressId,
+            @Valid @RequestBody AddressRequest request) {
+        return ResponseEntity.ok(userService.updateAddress(request, addressId, user));
+    }
+
+    @Operation(summary = "기본 배송지 변경 API",
+            description = "기본 배송지로 설정할 경우 다른 배송지는 설정 해제됩니다.")
+    @PutMapping("/address/default/{addressId}")
+    public ResponseEntity<?> updateDefaultAddress(
+            @Parameter(hidden = true) @Auth User user,
+            @PathVariable Long addressId) {
+        return ResponseEntity.ok(userService.updateDefaultAddress(addressId, user));
+    }
+
+    @Operation(summary = "회원 배송지 삭제 API")
+    @DeleteMapping("/address/{addressId}")
+    public ResponseEntity<?> deleteAddress(
+            @Parameter(hidden = true) @Auth User user,
+            @PathVariable Long addressId) {
+        userService.deleteAddress(addressId, user);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "회원탈퇴 API")
