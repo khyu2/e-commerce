@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.ecommerce.api.s3.service.S3Service;
 import project.ecommerce.api.user.dto.request.UserPasswordRequest;
+import project.ecommerce.api.user.dto.request.UserProfileImageRequest;
 import project.ecommerce.api.user.dto.request.UserProfileRequest;
 import project.ecommerce.api.user.dto.request.UserSignupRequest;
 import project.ecommerce.api.user.dto.response.UserResponse;
@@ -50,15 +51,16 @@ public class UserService {
     }
 
     @Transactional
-    public void updatePassword(UserPasswordRequest request, Long userId) {
+    public UserResponse updatePassword(UserPasswordRequest request, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
 
         user.encodePassword(passwordEncoder.encode(request.password()));
-        userRepository.save(user);
+        return UserResponse.of(userRepository.save(user));
     }
 
-    public void updateProfile(UserProfileRequest request, Long userId) {
+    @Transactional
+    public UserResponse updateProfileImage(UserProfileImageRequest request, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
 
@@ -66,8 +68,21 @@ public class UserService {
             throw new BaseException(UserExceptionType.INVALID_PROFILE_IMAGE_URL);
         }
 
+        log.info("업로드 되어야 하는 프로필 이미지 URL: {}", request.profileImageUrl());
+
         user.updateProfileImageUrl(request.profileImageUrl());
-        userRepository.save(user);
+        return UserResponse.of(userRepository.save(user));
+    }
+
+    @Transactional
+    public UserResponse updateProfile(UserProfileRequest request, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
+
+        // TODO: validate name
+
+        user.updateProfile(request.name());
+        return UserResponse.of(userRepository.save(user));
     }
 
     @Transactional
