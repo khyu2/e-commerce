@@ -19,8 +19,8 @@ public class S3Service {
     private final MinioClient minioClient;
     private final MinioConfig minioConfig;
 
-    public PresignedUrlResponse getUploadUrl() {
-        String uploadUrl = generateFileUploadUrl();
+    public PresignedUrlResponse getUploadUrl(String email) {
+        String uploadUrl = generateFileUploadUrl(email);
 
         try {
             ensureBucketExists();
@@ -109,7 +109,9 @@ public class S3Service {
         }
     }
 
-    private String generateFileUploadUrl() {
-        return System.currentTimeMillis() + "_" + java.util.UUID.randomUUID().toString().substring(0, 5);
+    private String generateFileUploadUrl(String email) {
+        return System.currentTimeMillis() + "_"
+                + email + "_"
+                + java.util.UUID.randomUUID().toString().substring(0, 5);
     }
 }

@@ -23,7 +23,7 @@ public class S3Controller {
     @Operation(summary = "파일 업로드용 presigned-url 생성 API")
     @GetMapping("/upload")
     public ResponseEntity<?> generatePresignedUploadUrl(@Parameter(hidden = true) @Auth User user) {
-        return ResponseEntity.ok(s3Service.getUploadUrl());
+        return ResponseEntity.ok(s3Service.getUploadUrl(user.getEmail()));
     }
 
     @Operation(summary = "파일 다운로드용 presigned-url 생성 API")
