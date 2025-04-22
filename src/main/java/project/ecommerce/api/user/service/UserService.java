@@ -64,13 +64,14 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
 
-        if (!s3Service.isFileUploaded(request.profileImageUrl())) {
+        if (request.profileImageUrl() == null) {
+            user.updateProfileImageUrl(null);
+        } else if (!s3Service.isFileUploaded(request.profileImageUrl())) {
             throw new BaseException(UserExceptionType.INVALID_PROFILE_IMAGE_URL);
+        } else {
+            user.updateProfileImageUrl(request.profileImageUrl());
         }
 
-        log.info("업로드 되어야 하는 프로필 이미지 URL: {}", request.profileImageUrl());
-
-        user.updateProfileImageUrl(request.profileImageUrl());
         return UserResponse.of(userRepository.save(user));
     }
 
