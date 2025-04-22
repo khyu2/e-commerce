@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import project.ecommerce.api.user.dto.request.UserPasswordRequest;
 import project.ecommerce.api.user.dto.request.UserProfileRequest;
 import project.ecommerce.api.user.dto.request.UserSignupRequest;
+import project.ecommerce.api.user.dto.response.UserResponse;
 import project.ecommerce.api.user.entity.User;
 import project.ecommerce.api.user.service.UserService;
 import project.ecommerce.common.auth.resolver.Auth;
@@ -25,8 +26,13 @@ public class UserController {
     @Operation(summary = "회원가입 API")
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody UserSignupRequest request) {
-        userService.signup(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userService.signup(request));
+    }
+
+    @Operation(summary = "회원 프로필 조회 API")
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(@Parameter(hidden = true) @Auth User user) {
+        return ResponseEntity.ok(UserResponse.of(user));
     }
 
     @Operation(summary = "비밀번호 검증 API")

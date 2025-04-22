@@ -7,26 +7,26 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
 
 @Getter
-@JsonPropertyOrder({"isSuccess", "code", "result"})
+@JsonPropertyOrder({"success", "code", "data"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BaseResponse<T> {
 
-    @JsonProperty("isSuccess")
-    private final boolean isSuccess;
+    @JsonProperty("success")
+    private final boolean success;
 
     private final String code;
 
     @JsonInclude(JsonInclude.Include.NON_NULL) // NULL인 경우 제외
-    private final T result;
+    private final T data;
 
-    public BaseResponse(T result) {
-        this.isSuccess = true;
+    public BaseResponse(T data) {
+        this.success = true;
         this.code = "200";
-        this.result = result;
+        this.data = data;
     }
 
     @JsonProperty("isSuccess") // "success"가 추가되지 않도록 명시적으로 설정
     public boolean isSuccess() {
-        return isSuccess;
+        return success;
     }
 }

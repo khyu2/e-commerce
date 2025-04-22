@@ -27,17 +27,19 @@ public class UserService {
 
     // TODO: password validation
     @Transactional
-    public void signup(UserSignupRequest request) {
+    public UserResponse signup(UserSignupRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new BaseException(UserExceptionType.USER_ALREADY_EXISTS);
         }
 
-        User user = request.toEntity();
-        user.encodePassword(passwordEncoder.encode(user.getPassword()));
+        User entity = request.toEntity();
+        entity.encodePassword(passwordEncoder.encode(entity.getPassword()));
 
-        userRepository.save(user);
+        User user = userRepository.save(entity);
 
         log.info("회원가입 성공: {}", user.getEmail());
+
+        return UserResponse.of(user);
     }
 
     public boolean validatePassword(UserPasswordRequest request, Long userId) {
