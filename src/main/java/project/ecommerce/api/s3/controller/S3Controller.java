@@ -33,4 +33,13 @@ public class S3Controller {
             @Valid @RequestBody PresignedUrlRequest request) {
         return ResponseEntity.ok(s3Service.getDownloadUrl(request.uploadUrl()));
     }
+
+    @Operation(summary = "파일 삭제 API")
+    @DeleteMapping("/{uploadUrl}")
+    public ResponseEntity<?> deleteFile(
+            @Parameter(hidden = true) @Auth User user,
+            @PathVariable String uploadUrl) {
+        s3Service.deleteFile(uploadUrl);
+        return ResponseEntity.ok().build();
+    }
 }

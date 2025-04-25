@@ -25,8 +25,8 @@ public class BaseResponse<T> {
         this.data = data;
     }
 
-    @JsonProperty("isSuccess") // "success"가 추가되지 않도록 명시적으로 설정
-    public boolean isSuccess() {
+    @JsonProperty("success") // "success"가 추가되지 않도록 명시적으로 설정
+    public boolean success() {
         return success;
     }
 }
