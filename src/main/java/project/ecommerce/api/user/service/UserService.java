@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class UserService {
 
     private final S3Service s3Service;
@@ -48,16 +48,17 @@ public class UserService {
         return UserResponse.of(user);
     }
 
-    public boolean validatePassword(UserPasswordRequest request, Long userId) {
-        User user = userRepository.findById(userId)
+    @Transactional(readOnly = true)
+    public boolean validatePassword(UserPasswordRequest request, String username) {
+        User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
 
         return passwordEncoder.matches(request.password(), user.getPassword());
     }
 
     @Transactional
-    public UserResponse updatePassword(UserPasswordRequest request, Long userId) {
-        User user = userRepository.findById(userId)
+    public UserResponse updatePassword(UserPasswordRequest request, String username) {
+        User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
 
         user.encodePassword(passwordEncoder.encode(request.password()));
@@ -65,8 +66,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updateProfileImage(UserProfileImageRequest request, Long userId) {
-        User user = userRepository.findById(userId)
+    public UserResponse updateProfileImage(UserProfileImageRequest request, String username) {
+        User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
 
         if (request.profileImageUrl() == null) {
@@ -81,8 +82,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updateProfile(UserProfileRequest request, Long userId) {
-        User user = userRepository.findById(userId)
+    public UserResponse updateProfile(UserProfileRequest request, String username) {
+        User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
 
         // TODO: validate name
@@ -92,8 +93,22 @@ public class UserService {
     }
 
     @Transactional
-    public AddressResponse addAddress(AddressRequest request, User user) {
-        if (user.getAddresses().size() >= ADDRESS_LIMIT) {
+    public List<AddressResponse> getAddresses(String username) {
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
+
+        return addressRepository.findAllByUser(user)
+                .stream().map(AddressResponse::of)
+                .toList();
+    }
+
+    @Transactional
+    public List<AddressResponse> addAddress(AddressRequest request, String username) {
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
+        List<Address> addresses = addressRepository.findAllByUser(user);
+
+        if (addresses.size() >= ADDRESS_LIMIT) {
             throw new BaseException(UserExceptionType.ADDRESS_LIMIT_EXCEEDED);
         }
 
@@ -105,12 +120,15 @@ public class UserService {
         }
 
         addressRepository.save(address);
-
-        return AddressResponse.of(address);
+        return addressRepository.findAllByUser(user)
+                .stream().map(AddressResponse::of)
+                .toList();
     }
 
     @Transactional
-    public AddressResponse updateAddress(AddressRequest request, Long addressId, User user) {
+    public AddressResponse updateAddress(AddressRequest request, Long addressId, String username) {
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
         if (user.getAddresses().size() >= ADDRESS_LIMIT
                 || user.getAddresses().isEmpty()) {
             throw new BaseException(UserExceptionType.ADDRESS_LIMIT_EXCEEDED);
@@ -129,7 +147,9 @@ public class UserService {
     }
 
     @Transactional
-    public AddressResponse updateDefaultAddress(Long addressId, User user) {
+    public AddressResponse updateDefaultAddress(Long addressId, String username) {
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
         Address address = user.getAddresses().stream()
                 .filter(a -> a.getId().equals(addressId))
                 .findFirst()
@@ -144,7 +164,9 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteAddress(Long addressId, User user) {
+    public void deleteAddress(Long addressId, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
         List<Address> addresses = user.getAddresses();
 
         if (addresses.size() == 1) {
@@ -169,8 +191,8 @@ public class UserService {
 
 
     @Transactional
-    public void deleteUser(Long userId) {
-        User user = userRepository.findById(userId)
+    public void deleteUser(String email) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
 
         userRepository.delete(user);

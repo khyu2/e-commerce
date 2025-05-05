@@ -22,14 +22,14 @@ public class S3Controller {
 
     @Operation(summary = "파일 업로드용 presigned-url 생성 API")
     @GetMapping("/upload")
-    public ResponseEntity<?> generatePresignedUploadUrl(@Parameter(hidden = true) @Auth User user) {
-        return ResponseEntity.ok(s3Service.getUploadUrl(user.getEmail()));
+    public ResponseEntity<?> generatePresignedUploadUrl(@Parameter(hidden = true) @Auth String username) {
+        return ResponseEntity.ok(s3Service.getUploadUrl(username));
     }
 
     @Operation(summary = "파일 다운로드용 presigned-url 생성 API")
     @PostMapping("/download")
     public ResponseEntity<?> generatePresignedDownloadUrl(
-            @Parameter(hidden = true) @Auth User user,
+            @Parameter(hidden = true) @Auth String username,
             @Valid @RequestBody PresignedUrlRequest request) {
         return ResponseEntity.ok(s3Service.getDownloadUrl(request.uploadUrl()));
     }
@@ -37,7 +37,7 @@ public class S3Controller {
     @Operation(summary = "파일 삭제 API")
     @DeleteMapping("/{uploadUrl}")
     public ResponseEntity<?> deleteFile(
-            @Parameter(hidden = true) @Auth User user,
+            @Parameter(hidden = true) @Auth String username,
             @PathVariable String uploadUrl) {
         s3Service.deleteFile(uploadUrl);
         return ResponseEntity.ok().build();

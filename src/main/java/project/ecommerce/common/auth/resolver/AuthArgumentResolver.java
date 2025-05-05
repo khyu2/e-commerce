@@ -38,6 +38,6 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
             throw new BaseException(UserExceptionType.UNAUTHORIZED);
         }
 
-        return userDetails.user();
+        return userDetails.getUsername();
     }
 }
