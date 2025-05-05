@@ -16,6 +16,7 @@ import project.ecommerce.api.user.repository.AddressRepository;
 import project.ecommerce.api.user.repository.UserRepository;
 import project.ecommerce.common.exception.BaseException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -92,14 +93,27 @@ public class UserService {
         return UserResponse.of(userRepository.save(user));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<AddressResponse> getAddresses(String username) {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
 
-        return addressRepository.findAllByUser(user)
-                .stream().map(AddressResponse::of)
-                .toList();
+        List<Address> addresses = addressRepository.findAllByUser(user);
+
+        Address defaultAddress = addresses.stream()
+                .filter(Address::getIsDefault)
+                .findFirst()
+                .orElseThrow(() -> new BaseException(UserExceptionType.DEFAULT_ADDRESS_NOT_FOUND));
+
+        // defaultAddress를 맨 앞에 추가
+        List<AddressResponse> response = new ArrayList<>();
+        response.add(AddressResponse.of(defaultAddress));
+
+        addresses.stream()
+                .filter(address -> !address.getIsDefault())
+                .forEach(address -> response.add(AddressResponse.of(address)));
+
+        return response;
     }
 
     @Transactional
@@ -126,7 +140,7 @@ public class UserService {
     }
 
     @Transactional
-    public AddressResponse updateAddress(AddressRequest request, Long addressId, String username) {
+    public List<AddressResponse> updateAddress(AddressRequest request, Long addressId, String username) {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
         if (user.getAddresses().size() >= ADDRESS_LIMIT
@@ -143,11 +157,13 @@ public class UserService {
 
         addressRepository.save(address);
 
-        return AddressResponse.of(address);
+        return addressRepository.findAllByUser(user)
+                .stream().map(AddressResponse::of)
+                .toList();
     }
 
     @Transactional
-    public AddressResponse updateDefaultAddress(Long addressId, String username) {
+    public List<AddressResponse> updateDefaultAddress(Long addressId, String username) {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
         Address address = user.getAddresses().stream()
@@ -160,11 +176,13 @@ public class UserService {
 
         addressRepository.save(address);
 
-        return AddressResponse.of(address);
+        return addressRepository.findAllByUser(user)
+                .stream().map(AddressResponse::of)
+                .toList();
     }
 
     @Transactional
-    public void deleteAddress(Long addressId, String email) {
+    public List<AddressResponse> deleteAddress(Long addressId, String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BaseException(UserExceptionType.USER_NOT_FOUND));
         List<Address> addresses = user.getAddresses();
@@ -187,6 +205,10 @@ public class UserService {
             addresses.forEach(a -> a.updateIsDefault(false));
             addresses.get(0).updateIsDefault(true);
         }
+
+        return addressRepository.findAllByUser(user)
+                .stream().map(AddressResponse::of)
+                .toList();
     }
 
 

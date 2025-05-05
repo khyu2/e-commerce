@@ -103,8 +103,7 @@ public class UserController {
     public ResponseEntity<?> deleteAddress(
             @Parameter(hidden = true) @Auth String username,
             @PathVariable Long addressId) {
-        userService.deleteAddress(addressId, username);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userService.deleteAddress(addressId, username));
     }
 
     @Operation(summary = "회원탈퇴 API")
