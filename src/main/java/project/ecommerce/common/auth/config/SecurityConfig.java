@@ -61,6 +61,7 @@ public class SecurityConfig {
                                 "/actuator/health",
                                 "/actuator/health/db"
                         ).permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll())
                 .build();
     }
