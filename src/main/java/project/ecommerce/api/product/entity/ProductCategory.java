@@ -15,13 +15,17 @@ public class ProductCategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String name;
 
-    @OneToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @Builder.Default
+    private Boolean isActive = false;
 
     public void updateName(String name) {
         this.name = name;
+    }
+
+    public void toggleIsActive() {
+        this.isActive = !this.isActive;
     }
 }
