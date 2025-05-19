@@ -25,7 +25,7 @@ public class AdminProductController {
             @Parameter(hidden = true) @Auth String username,
             @Valid @RequestBody ProductCreateRequest request
     ) {
-        return ResponseEntity.ok(productService.createProduct(username, request));
+        return ResponseEntity.ok(productService.createProduct(request));
     }
 
     // 상품 수정 API

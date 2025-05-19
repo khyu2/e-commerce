@@ -17,6 +17,7 @@ public enum ProductException implements ExceptionType {
     PRODUCT_FEATURE_NOT_FOUND(HttpStatus.NOT_FOUND, "PRODUCT-006", "상품 기능을 찾을 수 없습니다."),
 
     PRODUCT_ALREADY_EXISTS(HttpStatus.CONFLICT, "PRODUCT-007", "이미 존재하는 상품입니다."),
+    PRODUCT_CATEGORY_ALREADY_EXISTS(HttpStatus.CONFLICT, "PRODUCT-008", "이미 존재하는 상품 카테고리입니다."),
     ;
 
     private final HttpStatus httpStatus;

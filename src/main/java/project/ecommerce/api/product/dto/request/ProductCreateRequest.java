@@ -20,8 +20,8 @@ public record ProductCreateRequest(
         @Min(value = 0, message = "가격은 0 이상이어야 합니다")
         Long price,
 
-        @Valid
-        ProductCategoryRequest productCategory,
+        @NotNull(message = "카테고리는 필수입니다")
+        Long categoryId,
 
         @Valid
         List<ProductImageRequest> productImage,

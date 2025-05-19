@@ -18,7 +18,8 @@ public class ProductFeature {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
 }

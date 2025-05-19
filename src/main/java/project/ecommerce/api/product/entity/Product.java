@@ -36,7 +36,8 @@ public class Product extends BaseTimeEntity {
 
     private LocalDateTime deletedAt;
 
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_category_id", nullable = false)
     private ProductCategory category;
 
     @Builder.Default
@@ -61,5 +62,25 @@ public class Product extends BaseTimeEntity {
         this.name = name;
         this.price = price;
         this.description = description;
+    }
+
+    public void addImages(ProductImage image) {
+        this.images.add(image);
+        image.setProduct(this);
+    }
+
+    public void addColors(ProductColor color) {
+        this.colors.add(color);
+        color.setProduct(this);
+    }
+
+    public void addSizes(ProductSize size) {
+        this.sizes.add(size);
+        size.setProduct(this);
+    }
+
+    public void addFeatures(ProductFeature feature) {
+        this.features.add(feature);
+        feature.setProduct(this);
     }
 }

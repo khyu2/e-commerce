@@ -11,9 +11,9 @@ public record ProductResponse(
         String imageUrl,
         String description,
         ProductCategoryResponse productCategory,
-        List<ProductColorResponse> productColor,
-        List<ProductImageResponse> productImage,
-        List<ProductSizeResponse> productSize
+        List<ProductColorResponse> productColors,
+        List<ProductImageResponse> productImages,
+        List<ProductSizeResponse> productSizes
 ) {
     public static ProductResponse of(Product product) {
         return new ProductResponse(

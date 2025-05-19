@@ -49,7 +49,7 @@ public class S3Service {
                             .method(Method.GET)
                             .bucket(minioConfig.getBucketName())
                             .object(uploadFileUrl)
-                            .expiry(10, TimeUnit.MINUTES)
+                            .expiry(60, TimeUnit.MINUTES)
                             .build()
             );
 

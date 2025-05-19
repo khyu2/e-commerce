@@ -17,8 +17,9 @@ public class ProductSize {
 
     private String name;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
 
     public void updateName(String name) {

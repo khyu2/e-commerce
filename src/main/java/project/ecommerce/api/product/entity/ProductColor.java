@@ -19,7 +19,8 @@ public class ProductColor {
 
     private String colorCode; // e.g. #FFFFFF
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
 }
