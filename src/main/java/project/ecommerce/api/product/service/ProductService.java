@@ -37,45 +37,6 @@ public class ProductService {
                 .category(productCategory)
                 .build();
 
-        List<ProductImage> productImages = request.productImage() != null ?
-                request.productImage().stream()
-                        .filter(imageRequest -> s3Service.isFileUploaded(imageRequest.imageUrl()))
-                        .map(imageRequest -> ProductImage.builder()
-                                .imageUrl(imageRequest.imageUrl())
-                                .product(product)
-                                .build())
-                        .toList() : List.of();
-
-        List<ProductColor> productColors = request.productColor() != null ?
-                request.productColor().stream()
-                        .map(colorRequest -> ProductColor.builder()
-                                .name(colorRequest.name())
-                                .colorCode(colorRequest.colorCode())
-                                .product(product)
-                                .build())
-                        .toList() : List.of();
-
-        List<ProductSize> productSizes = request.productSize() != null ?
-                request.productSize().stream()
-                        .map(sizeRequest -> ProductSize.builder()
-                                .name(sizeRequest.name())
-                                .product(product)
-                                .build())
-                        .toList() : List.of();
-
-        List<ProductFeature> productFeatures = request.productFeature() != null ?
-                request.productFeature().stream()
-                        .map(featureRequest -> ProductFeature.builder()
-                                .description(featureRequest.description())
-                                .product(product)
-                                .build())
-                        .toList() : List.of();
-
-        productImages.forEach(product::addImages);
-        productColors.forEach(product::addColors);
-        productSizes.forEach(product::addSizes);
-        productFeatures.forEach(product::addFeatures);
-
         productRepository.save(product);
 
         return productRepository.findAll().stream()

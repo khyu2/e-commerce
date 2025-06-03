@@ -40,47 +40,11 @@ public class Product extends BaseTimeEntity {
     @JoinColumn(name = "product_category_id", nullable = false)
     private ProductCategory category;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductImage> images = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductColor> colors = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductSize> sizes = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductFeature> features = new ArrayList<>();
-
     // TODO: RelatedProduct Entity
 
     public void update(String name, Long price, String description) {
         this.name = name;
         this.price = price;
         this.description = description;
-    }
-
-    public void addImages(ProductImage image) {
-        this.images.add(image);
-        image.setProduct(this);
-    }
-
-    public void addColors(ProductColor color) {
-        this.colors.add(color);
-        color.setProduct(this);
-    }
-
-    public void addSizes(ProductSize size) {
-        this.sizes.add(size);
-        size.setProduct(this);
-    }
-
-    public void addFeatures(ProductFeature feature) {
-        this.features.add(feature);
-        feature.setProduct(this);
     }
 }
